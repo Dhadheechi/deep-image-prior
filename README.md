@@ -1,74 +1,61 @@
-**Warning!** The optimization may not converge on some GPUs. We've personally experienced issues on Tesla V100 and P40 GPUs. When running the code, make sure you get similar results to the paper first. Easiest to check using text inpainting notebook.  Try to set double precision mode or turn off cudnn. 
+# Deep Image Prior for Super-Resolution
 
-# Deep image prior
+This repository is a focused starting point for the assignment experiment:
+single-image super-resolution with a Deep Image Prior (DIP). The model is
+trained from scratch for each image; there is no dataset pretraining.
 
-In this repository we provide *Jupyter Notebooks* to reproduce each figure from the paper:
+The repository is intentionally notebook-first. The code under `src/dip_sr`
+is a small importable package, while the committed notebook is the cloud
+experiment template that can later contain the final DIP variants and W&B
+results.
 
-> **Deep Image Prior**
+## Assignment-aligned workflow
 
-> CVPR 2018
+1. Open [`notebooks/super_resolution_template.ipynb`](notebooks/super_resolution_template.ipynb)
+   in Google Colab or Kaggle.
+2. Install the project in the notebook with `uv` (the first setup cell does
+   this) or use the platform's normal pip-compatible kernel.
+3. Run the baseline against the included/selected image.
+4. Add model or optimization variants as separate W&B runs with the same
+   input, scale, seed, and evaluation protocol.
+5. Commit the notebook after the cloud runs so the visual comparison, PSNR
+   table, and W&B links are part of the GitHub history.
 
-> Dmitry Ulyanov, Andrea Vedaldi, Victor Lempitsky
+The experiment logs both low-resolution reconstruction PSNR (the optimization
+objective) and high-resolution PSNR (available when a ground-truth HR image is
+known). For a real inverse problem, use the former for monitoring and reserve
+the latter for evaluation.
 
+## Install
 
-[[paper]](https://sites.skoltech.ru/app/data/uploads/sites/25/2018/04/deep_image_prior.pdf) [[supmat]](https://box.skoltech.ru/index.php/s/ib52BOoV58ztuPM) [[project page]](https://dmitryulyanov.github.io/deep_image_prior)
+The project uses `uv` and a `src` layout:
 
-![](data/teaser_compiled.jpg)
-
-Here we provide hyperparameters and architectures, that were used to generate the figures. Most of them are far from optimal. Do not hesitate to change them and see the effect.
-
-We will expand this README with a list of hyperparameters and options shortly.
-
-# Install
-
-Here is the list of libraries you need to install to execute the code:
-- python = 3.6
-- [pytorch](http://pytorch.org/) = 0.4
-- numpy
-- scipy
-- matplotlib
-- scikit-image
-- jupyter
-
-All of them can be installed via `conda` (`anaconda`), e.g.
-```
-conda install jupyter
-```
-
-
-or create an conda env with all dependencies via environment file
-
-```
-conda env create -f environment.yml
+```bash
+uv sync --extra notebook
+uv run jupyter lab
 ```
 
-## Docker image
+In Colab or Kaggle, the equivalent is:
 
-Alternatively, you can use a Docker image that exposes a Jupyter Notebook with all required dependencies. To build this image ensure you have both [docker](https://www.docker.com/) and  [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) installed, then run
-
-```
-nvidia-docker build -t deep-image-prior .
+```python
+!pip install -e ".[notebook]"
 ```
 
-After the build you can start the container as
+For GPU training, install the platform's compatible PyTorch build if its
+default PyTorch version does not match the CUDA runtime. W&B is optional at
+runtime: leave `wandb_project=None` for a local/offline smoke test, or set a
+project name and authenticate with `wandb.login()` before training.
 
+## Layout
+
+```text
+src/dip_sr/                  reusable data, model, metrics, and training code
+notebooks/super_resolution_template.ipynb
+pyproject.toml               uv/Python dependency declaration
 ```
-nvidia-docker run --rm -it --ipc=host -p 8888:8888 deep-image-prior
-```
 
-you will be provided an URL through which you can connect to the Jupyter notebook.
+## Scope
 
-## Google Colab
-
-To run it using Google Colab, click [here](https://colab.research.google.com/github/DmitryUlyanov/deep-image-prior) and select the notebook to run. Remember to uncomment the first cell to clone the repository into colab's environment.
-
-
-# Citation
-```
-@article{UlyanovVL17,
-    author    = {Ulyanov, Dmitry and Vedaldi, Andrea and Lempitsky, Victor},
-    title     = {Deep Image Prior},
-    journal   = {arXiv:1711.10925},
-    year      = {2017}
-}
-```
+This is a baseline template, not a claim of a completed assignment result.
+The intended next step is to implement one controlled DIP variation, run it
+against this baseline in the cloud, and compare images and metrics in W&B.
